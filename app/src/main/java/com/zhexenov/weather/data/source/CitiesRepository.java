@@ -12,12 +12,17 @@ public class CitiesRepository implements CitiesDataSource {
     private final CitiesDataSource citiesLocalDataSource;
 
     @Inject
-    CitiesRepository(CitiesDataSource citiesLocalDataSource) {
+    CitiesRepository(@Local CitiesDataSource citiesLocalDataSource) {
         this.citiesLocalDataSource = citiesLocalDataSource;
     }
 
     @Override
     public void getCity(int cityId, @NonNull GetCityCallback callback) {
         citiesLocalDataSource.getCity(cityId, callback);
+    }
+
+    @Override
+    public void getCities(String searchText, @NonNull LoadCitiesCallback callback) {
+        citiesLocalDataSource.getCities(searchText, callback);
     }
 }

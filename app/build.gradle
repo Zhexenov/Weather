@@ -51,6 +51,8 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxandroidVersion"
     implementation "com.squareup.sqlbrite2:sqlbrite:$rootProject.sqlbriteVersion"
 
+    implementation "android.arch.persistence.room:rxjava2:$rootProject.roomVersion"
+
     // Dagger dependencies
     implementation "com.google.dagger:dagger:$rootProject.daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$rootProject.daggerVersion"

@@ -1,17 +1,20 @@
 package com.zhexenov.weather.data.source.local;
 
+import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.zhexenov.weather.data.City;
 import com.zhexenov.weather.data.source.CitiesDataSource;
-import com.zhexenov.weather.util.AppExecutors;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 
 @Singleton
@@ -19,38 +22,42 @@ public class CitiesLocalDataSource implements CitiesDataSource {
 
     private final CitiesDao citiesDao;
 
-    private final AppExecutors appExecutors;
-
     @Inject
-    CitiesLocalDataSource(CitiesDao citiesDao, AppExecutors appExecutors) {
+    CitiesLocalDataSource(CitiesDao citiesDao) {
         this.citiesDao = citiesDao;
-        this.appExecutors = appExecutors;
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public void getCity(final int cityId, @NonNull final GetCityCallback callback) {
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                final City city = citiesDao.getCityById(cityId);
-                List<City> list = citiesDao.getCities();
-                Log.e("tag", "size: " + list.size());
-                appExecutors.mainThread().execute(new Runnable() {
+        citiesDao.getCityById(cityId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<City>() {
                     @Override
-                    public void run() {
-                        if (city != null) {
-                            callback.onCityLoaded(city);
+                    public void accept(City city) {
+                        if (city == null) {
+                            callback.onDataNotAvailable();
                         } else {
-                            Log.e("tag", "city is null");
+                            callback.onCityLoaded(city);
                         }
                     }
                 });
-            }
-        };
-
-        appExecutors.diskIO().execute(runnable);
     }
 
 
+    @SuppressLint("CheckResult")
+    @Override
+    public void getCities(String searchText, @NonNull final LoadCitiesCallback callback) {
+        citiesDao.loadCities(searchText).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<City>>() {
+                    @Override
+                    public void accept(List<City> cities) {
+                        if (cities.isEmpty()) {
+                            callback.onDataNotAvailable();
+                        } else {
+                            callback.onCitiesLoaded(cities);
+                        }
+                    }
+                });
+    }
 }

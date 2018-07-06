@@ -1,19 +1,24 @@
 package com.zhexenov.weather.main;
 
-import android.util.Log;
-
 import com.zhexenov.weather.data.City;
 import com.zhexenov.weather.data.source.CitiesDataSource;
 import com.zhexenov.weather.data.source.CitiesRepository;
 import com.zhexenov.weather.di.ActivityScoped;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
 import javax.inject.Inject;
+
+import timber.log.Timber;
 
 @ActivityScoped
 final class MainPresenter implements MainContract.Presenter {
 
     private final CitiesRepository citiesRepository;
 
+    @Nullable
+    private MainContract.View view;
 
     @Inject
     MainPresenter(CitiesRepository citiesRepository) {
@@ -22,12 +27,19 @@ final class MainPresenter implements MainContract.Presenter {
 
 
     @Override
-    public void loadCity() {
-        Log.e("tag", "here");
-        citiesRepository.getCity(1270260, new CitiesDataSource.GetCityCallback() {
+    public void loadCities(String searchText) {
+        citiesRepository.getCities(searchText, new CitiesDataSource.LoadCitiesCallback() {
             @Override
-            public void onCityLoaded(City city) {
-                Log.e("Tag:", city.getName());
+            public void onCitiesLoaded(List<City> cities) {
+                Timber.e("List size: %d", cities.size());
+                if (view != null) {
+                    view.showCities(cities);
+                }
+            }
+
+            @Override
+            public void onDataNotAvailable() {
+                Timber.e("Data not available");
             }
         });
     }
@@ -39,7 +51,7 @@ final class MainPresenter implements MainContract.Presenter {
      */
     @Override
     public void takeView(MainContract.View view) {
-
+        this.view = view;
     }
 
     /**
@@ -47,6 +59,6 @@ final class MainPresenter implements MainContract.Presenter {
      */
     @Override
     public void dropView() {
-
+        view = null;
     }
 }

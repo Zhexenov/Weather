@@ -8,12 +8,15 @@ import com.zhexenov.weather.data.City;
 
 import java.util.List;
 
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+
 @Dao
 public interface CitiesDao {
 
-    @Query("SELECT * FROM CITIES")
-    List<City> getCities();
+    @Query("SELECT * FROM CITIES WHERE name LIKE :text || '%'")
+    Flowable<List<City>> loadCities(String text);
 
     @Query("SELECT * FROM CITIES WHERE id = :cityId")
-    City getCityById(int cityId);
+    Maybe<City> getCityById(int cityId);
 }
