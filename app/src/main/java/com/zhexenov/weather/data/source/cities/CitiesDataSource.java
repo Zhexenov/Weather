@@ -1,4 +1,4 @@
-package com.zhexenov.weather.data.source;
+package com.zhexenov.weather.data.source.cities;
 
 import android.support.annotation.NonNull;
 

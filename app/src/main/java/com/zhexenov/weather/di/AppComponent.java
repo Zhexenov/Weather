@@ -3,9 +3,9 @@ package com.zhexenov.weather.di;
 import android.app.Application;
 
 import com.zhexenov.weather.WeatherApplication;
-import com.zhexenov.weather.data.source.CitiesRepository;
 import com.zhexenov.weather.modules.ActivityBindingModule;
 import com.zhexenov.weather.modules.ApplicationModule;
+import com.zhexenov.weather.modules.NetworkModule;
 import com.zhexenov.weather.modules.WeatherRepositoryModule;
 
 import javax.inject.Singleton;
@@ -20,7 +20,8 @@ import dagger.android.support.AndroidSupportInjectionModule;
 @Component(modules = {WeatherRepositoryModule.class,
         ApplicationModule.class,
         AndroidSupportInjectionModule.class,
-        ActivityBindingModule.class})
+        ActivityBindingModule.class,
+        NetworkModule.class})
 public interface AppComponent extends AndroidInjector<WeatherApplication> {
 
     @Component.Builder

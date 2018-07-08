@@ -1,4 +1,4 @@
-package com.zhexenov.weather.data.source.local;
+package com.zhexenov.weather.data.source.cities.local;
 
 
 import android.arch.persistence.room.Dao;

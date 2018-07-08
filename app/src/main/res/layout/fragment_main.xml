@@ -17,8 +17,10 @@
         android:id="@+id/city_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/cardview_default_elevation"
+        android:layout_margin="@dimen/row_padding_vertical"
+        android:padding="@dimen/row_padding_vertical"
         android:hint="@string/enter_city_name"
+        android:background="@drawable/rounded_edittext"
         android:inputType="textEmailAddress"
         app:layout_constraintBottom_toBottomOf="parent" />
 

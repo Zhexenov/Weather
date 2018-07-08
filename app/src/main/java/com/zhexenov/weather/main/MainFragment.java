@@ -1,6 +1,8 @@
 package com.zhexenov.weather.main;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,7 +16,6 @@ import android.view.ViewGroup;
 import com.zhexenov.weather.R;
 import com.zhexenov.weather.WeatherApplication;
 import com.zhexenov.weather.data.City;
-import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.util.RecyclerTouchListener;
 
 import java.util.ArrayList;
@@ -36,9 +37,11 @@ public class MainFragment extends DaggerFragment implements MainContract.View {
     RecyclerView recyclerView;
     CitiesAdapter adapter;
 
+    Handler handler = new Handler(Looper.getMainLooper());
+    Runnable runnable;
+
     @Inject
-    public MainFragment() {
-    }
+    public MainFragment() { }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,13 +77,13 @@ public class MainFragment extends DaggerFragment implements MainContract.View {
         recyclerView.addItemDecoration(new DividerItemDecoration(WeatherApplication.getAppContext(), LinearLayoutManager.VERTICAL));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
-
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(WeatherApplication.getAppContext(),
                 recyclerView,
                 new RecyclerTouchListener.ClickListener() {
                     @Override
                     public void onClick(View view, int position) {
-                        Timber.e("Item click: %d", position);
+                        City city = adapter.getItemAt(position);
+                        Timber.e("Item click: %d", city.getId());
                     }
 
                     @Override
@@ -96,9 +99,16 @@ public class MainFragment extends DaggerFragment implements MainContract.View {
     }
 
     @OnTextChanged(R.id.city_name)
-    void onTextChanged(CharSequence text) {
+    void onTextChanged(final CharSequence text) {
+
         if (text.length() > 1) {
-            presenter.loadCities(String.valueOf(text));
+            handler.removeCallbacks(runnable);
+            runnable = () -> searchCities(text.toString());
+            handler.postDelayed(runnable, 300);
         }
+    }
+
+    private void  searchCities(String text) {
+        presenter.loadCities(text);
     }
 }

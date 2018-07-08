@@ -1,7 +1,9 @@
-package com.zhexenov.weather.data.source;
+package com.zhexenov.weather.data.source.cities;
 
 
 import android.support.annotation.NonNull;
+
+import com.zhexenov.weather.data.source.Local;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

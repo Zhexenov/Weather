@@ -1,8 +1,11 @@
 package com.zhexenov.weather.main;
 
 import com.zhexenov.weather.data.City;
-import com.zhexenov.weather.data.source.CitiesDataSource;
-import com.zhexenov.weather.data.source.CitiesRepository;
+import com.zhexenov.weather.data.Weather;
+import com.zhexenov.weather.data.source.cities.CitiesDataSource;
+import com.zhexenov.weather.data.source.cities.CitiesRepository;
+import com.zhexenov.weather.data.source.weather.WeatherDataSource;
+import com.zhexenov.weather.data.source.weather.WeatherRepository;
 import com.zhexenov.weather.di.ActivityScoped;
 
 import java.util.List;
@@ -16,13 +19,15 @@ import timber.log.Timber;
 final class MainPresenter implements MainContract.Presenter {
 
     private final CitiesRepository citiesRepository;
+    private final WeatherRepository weatherRepository;
 
     @Nullable
     private MainContract.View view;
 
     @Inject
-    MainPresenter(CitiesRepository citiesRepository) {
+    MainPresenter(CitiesRepository citiesRepository, WeatherRepository weatherRepository) {
         this.citiesRepository = citiesRepository;
+        this.weatherRepository = weatherRepository;
     }
 
 
@@ -33,6 +38,20 @@ final class MainPresenter implements MainContract.Presenter {
             public void onCitiesLoaded(List<City> cities) {
                 if (view != null) {
                     view.showCities(cities);
+
+                    for (City city: cities) {
+                        weatherRepository.getWeatherForCity(city.getId(), new WeatherDataSource.GetWeatherCallback() {
+                            @Override
+                            public void onWeatherLoaded(Weather forecast) {
+                                Timber.e("Forecast: %s - %s", forecast.getCityId(), forecast.getMain().getTemp());
+                            }
+
+                            @Override
+                            public void onDataNotAvailable() {
+                                Timber.e("Weather not available");
+                            }
+                        });
+                    }
                 }
             }
 

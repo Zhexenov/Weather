@@ -2,13 +2,20 @@ package com.zhexenov.weather.modules;
 
 
 import android.app.Application;
+import android.arch.persistence.room.Room;
 
 import com.huma.room_for_asset.RoomAsset;
-import com.zhexenov.weather.data.source.CitiesDataSource;
+import com.zhexenov.weather.data.source.CitiesDatabase;
+import com.zhexenov.weather.data.source.Remote;
+import com.zhexenov.weather.data.source.cities.CitiesDataSource;
 import com.zhexenov.weather.data.source.Local;
-import com.zhexenov.weather.data.source.local.CitiesDao;
-import com.zhexenov.weather.data.source.local.CitiesLocalDataSource;
-import com.zhexenov.weather.data.source.local.WeatherDatabase;
+import com.zhexenov.weather.data.source.cities.local.CitiesDao;
+import com.zhexenov.weather.data.source.cities.local.CitiesLocalDataSource;
+import com.zhexenov.weather.data.source.WeatherDatabase;
+import com.zhexenov.weather.data.source.weather.WeatherDataSource;
+import com.zhexenov.weather.data.source.weather.local.WeatherLocalDataSource;
+import com.zhexenov.weather.data.source.weather.local.WeathersDao;
+import com.zhexenov.weather.data.source.weather.remote.WeatherRemoteDataSource;
 
 import javax.inject.Singleton;
 
@@ -20,12 +27,10 @@ import dagger.Provides;
 @Module
 abstract public class WeatherRepositoryModule {
 
-    private static final int THREAD_COUNT = 3;
-
     @Singleton
     @Provides
-    static WeatherDatabase provideDb(Application context) {
-        return RoomAsset.databaseBuilder(context.getApplicationContext(), WeatherDatabase.class, "Weather.db")
+    static WeatherDatabase provideWeathersDb(Application context) {
+        return Room.databaseBuilder(context.getApplicationContext(), WeatherDatabase.class, "Weather.db")
                 .fallbackToDestructiveMigration()
                 .fallbackToDestructiveMigrationFrom()
                 .build();
@@ -33,8 +38,21 @@ abstract public class WeatherRepositoryModule {
 
     @Singleton
     @Provides
-    static CitiesDao provideCitiesDao(WeatherDatabase db) {
+    static CitiesDatabase provideCitiesDb(Application context) {
+        return RoomAsset.databaseBuilder(context.getApplicationContext(), CitiesDatabase.class, "CitiesDatabase.db")
+                .build();
+    }
+
+    @Singleton
+    @Provides
+    static CitiesDao provideCitiesDao(CitiesDatabase db) {
         return db.citiesDao();
+    }
+
+    @Singleton
+    @Provides
+    static WeathersDao provideWeathersDao(WeatherDatabase db) {
+        return db.weathersDao();
     }
 
 
@@ -42,4 +60,16 @@ abstract public class WeatherRepositoryModule {
     @Binds
     @Local
     abstract CitiesDataSource provideCitiesDataSource(CitiesLocalDataSource dataSource);
+
+
+    @Singleton
+    @Binds
+    @Local
+    abstract WeatherDataSource provideWeathersLocalDataSource(WeatherLocalDataSource dataSource);
+
+    @Singleton
+    @Binds
+    @Remote
+    abstract WeatherDataSource provideWeathersRemoteDataSource(WeatherRemoteDataSource dataSource);
+
 }
