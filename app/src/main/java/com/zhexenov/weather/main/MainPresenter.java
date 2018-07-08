@@ -31,7 +31,6 @@ final class MainPresenter implements MainContract.Presenter {
         citiesRepository.getCities(searchText, new CitiesDataSource.LoadCitiesCallback() {
             @Override
             public void onCitiesLoaded(List<City> cities) {
-                Timber.e("List size: %d", cities.size());
                 if (view != null) {
                     view.showCities(cities);
                 }

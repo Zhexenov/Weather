@@ -1,6 +1,7 @@
 package com.zhexenov.weather.main;
 
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder> {
     /**
@@ -40,13 +42,18 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
 
     private List<City> dataSet;
 
-    public CitiesAdapter(List<City> dataSet) {
+    CitiesAdapter(List<City> dataSet) {
         this.dataSet = dataSet;
     }
 
     public void updateDataSet(List<City> dataSet) {
-        this.dataSet = dataSet;
-        notifyDataSetChanged();
+        final CitiesDiffCallback diffCallback = new CitiesDiffCallback(this.dataSet, dataSet);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        this.dataSet.clear();
+        this.dataSet.addAll(dataSet);
+        diffResult.dispatchUpdatesTo(this);
+        Timber.e("DataSet size: %d", this.dataSet.size());
     }
 
     @NonNull
