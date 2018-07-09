@@ -11,7 +11,11 @@ public interface MainContract {
 
     interface View extends BaseView<Presenter> {
 
+        void showLastQuery(String text);
+
         void showCities(List<City> cities);
+
+        void showSearchError();
 
         void showWeatherForCity(Weather weather, City city);
 
@@ -19,6 +23,6 @@ public interface MainContract {
     }
 
     interface Presenter extends BasePresenter<View> {
-        void loadCities(String searchText);
+        void loadCities(String searchText, boolean onlyValidCache);
     }
 }

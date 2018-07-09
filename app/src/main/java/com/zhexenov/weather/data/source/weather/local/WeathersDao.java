@@ -8,6 +8,9 @@ import android.arch.persistence.room.Query;
 
 import com.zhexenov.weather.data.Weather;
 
+import java.util.List;
+
+import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 @Dao

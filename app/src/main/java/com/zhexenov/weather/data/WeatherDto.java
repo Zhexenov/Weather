@@ -13,6 +13,8 @@ public class WeatherDto {
     @SerializedName("main")
     private Main main;
 
+    public WeatherDto() {
+    }
 
     public int getCityId() {
         return cityId;

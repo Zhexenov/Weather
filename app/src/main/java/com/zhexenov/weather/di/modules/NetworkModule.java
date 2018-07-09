@@ -1,8 +1,7 @@
-package com.zhexenov.weather.modules;
+package com.zhexenov.weather.di.modules;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.zhexenov.weather.BuildConfig;
 import com.zhexenov.weather.api.WeatherApi;
 
 import javax.inject.Singleton;

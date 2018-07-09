@@ -1,4 +1,4 @@
-package com.zhexenov.weather.modules;
+package com.zhexenov.weather.di.modules;
 
 import com.zhexenov.weather.di.ActivityScoped;
 import com.zhexenov.weather.main.MainActivity;

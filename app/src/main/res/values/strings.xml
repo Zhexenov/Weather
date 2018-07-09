@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Weather</string>
     <string name="enter_city_name">Enter city name</string>
-    <string name="cities">Cities</string>
+    <string name="cities">Weather in KZ</string>
+    <string name="initial_text">Start typing the city name..</string>
+    <string name="data_nor_found">Data not found</string>
+    <string name="region">Region</string>
+    <string name="weather">Weather</string>
 </resources>

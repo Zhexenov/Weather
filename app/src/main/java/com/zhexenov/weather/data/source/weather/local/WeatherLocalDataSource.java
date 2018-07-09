@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -29,9 +31,8 @@ public class WeatherLocalDataSource implements WeatherDataSource {
         this.weathersDao = weathersDao;
     }
 
-    @SuppressLint("CheckResult")
     @Override
-    public void getWeatherForCity(int cityId, @NonNull final GetWeatherCallback callback) {
+    public void getWeatherForCity(int cityId, boolean onlyValidCache, @NonNull final GetWeatherCallback callback) {
         weathersDao.getWeatherForCityId(cityId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSingleObserver<Weather>() {
                     @Override
@@ -47,14 +48,13 @@ public class WeatherLocalDataSource implements WeatherDataSource {
     }
     
 
-    @SuppressLint("CheckResult")
     @Override
     public void saveWeather(@NonNull Weather forecast) {
-        Completable.fromAction(() -> weathersDao.insertWeather(forecast));
+        Completable.fromAction(() -> weathersDao.insertWeather(forecast)).subscribeOn(Schedulers.io()).subscribe();
     }
 
     @Override
     public void deleteWeather(@NonNull Weather forecast) {
-        weathersDao.deleteWeather(forecast);
+        Completable.fromAction(() -> weathersDao.deleteWeather(forecast)).subscribeOn(Schedulers.io()).subscribe();
     }
 }

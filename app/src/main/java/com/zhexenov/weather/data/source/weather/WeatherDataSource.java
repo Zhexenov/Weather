@@ -13,7 +13,7 @@ import io.reactivex.Single;
 
 public interface WeatherDataSource {
 
-    void getWeatherForCity(int cityId, @NonNull GetWeatherCallback callback);
+    void getWeatherForCity(int cityId, boolean onlyValidCache, @NonNull GetWeatherCallback callback);
 
     void saveWeather(@NonNull Weather forecast);
 

@@ -10,11 +10,8 @@ import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 
 import javax.inject.Inject;
 
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class WeatherRemoteDataSource implements WeatherDataSource {
 
@@ -27,15 +24,18 @@ public class WeatherRemoteDataSource implements WeatherDataSource {
 
     @SuppressLint("CheckResult")
     @Override
-    public void getWeatherForCity(int cityId, @NonNull final GetWeatherCallback callback) {
-        Timber.e("Remote city id: %s", cityId);
-
+    public void getWeatherForCity(int cityId, boolean onlyValidCache, @NonNull final GetWeatherCallback callback) {
         api.fetchWeather(cityId, "16f357cca642e295922954dfe882053f", "metric")
-                .subscribeOn(Schedulers.computation())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .onErrorReturn(throwable -> new WeatherDto())
                 .subscribe(forecast -> {
-                    Weather weather = new Weather(forecast.getCityId(), forecast.getDateTime(), forecast.getMain().getTemp());
-                    callback.onWeatherLoaded(weather);
+                    if (forecast.getMain() == null || forecast.getCityId() == 0) {
+                        callback.onDataNotAvailable();
+                    } else {
+                        Weather weather = new Weather(forecast.getCityId(), forecast.getDateTime(), forecast.getMain().getTemp());
+                        callback.onWeatherLoaded(weather);
+                    }
                 });
     }
 

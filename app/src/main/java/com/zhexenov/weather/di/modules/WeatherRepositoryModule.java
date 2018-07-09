@@ -1,4 +1,4 @@
-package com.zhexenov.weather.modules;
+package com.zhexenov.weather.di.modules;
 
 
 import android.app.Application;
@@ -31,8 +31,7 @@ abstract public class WeatherRepositoryModule {
     @Provides
     static WeatherDatabase provideWeathersDb(Application context) {
         return Room.databaseBuilder(context.getApplicationContext(), WeatherDatabase.class, "Weather.db")
-                .fallbackToDestructiveMigration()
-                .fallbackToDestructiveMigrationFrom()
+                .allowMainThreadQueries()
                 .build();
     }
 

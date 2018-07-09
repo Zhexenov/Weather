@@ -7,6 +7,7 @@ import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.data.source.Local;
 import com.zhexenov.weather.data.source.Remote;
 
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,7 +34,7 @@ public class WeatherRepository implements WeatherDataSource {
 
 
     @Override
-    public void getWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {
+    public void getWeatherForCity(int cityId, boolean onlyValidCache, @NonNull GetWeatherCallback callback) {
         Weather weather = getWeatherForCity(cityId);
         if (weather != null) {
             if (isValidCache(weather)) {
@@ -42,11 +43,12 @@ public class WeatherRepository implements WeatherDataSource {
             }
             cachedWeathers.remove(cityId);
         }
-
-        localDataSource.getWeatherForCity(cityId, new GetWeatherCallback() {
+        localDataSource.getWeatherForCity(cityId, onlyValidCache, new GetWeatherCallback() {
             @Override
             public void onWeatherLoaded(Weather forecast) {
-                if (isValidCache(forecast)) {
+                if (!onlyValidCache) {
+                    callback.onWeatherLoaded(forecast);
+                } else if (isValidCache(forecast)) {
                     cacheWeather(forecast);
                     callback.onWeatherLoaded(forecast);
                 } else {
@@ -72,10 +74,9 @@ public class WeatherRepository implements WeatherDataSource {
     }
 
     private void loadRemoteWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {
-        remoteDataSource.getWeatherForCity(cityId, new GetWeatherCallback() {
+        remoteDataSource.getWeatherForCity(cityId, false, new GetWeatherCallback() {
             @Override
             public void onWeatherLoaded(Weather forecast) {
-                Timber.e("Loaded forecast: %s - %s", forecast.getCityId(), forecast.getTemp());
                 cacheWeather(forecast);
                 saveWeather(forecast);
                 callback.onWeatherLoaded(forecast);
@@ -96,7 +97,7 @@ public class WeatherRepository implements WeatherDataSource {
     }
 
     private boolean isValidCache(@NonNull Weather weather) {
-        long seconds = System.currentTimeMillis() / 1000;
+        long seconds = Calendar.getInstance().getTimeInMillis() / 1000;
         return weather.getDateTime() + 3600 > seconds;
     }
 

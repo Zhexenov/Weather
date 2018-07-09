@@ -1,5 +1,7 @@
 package com.zhexenov.weather.main.adapter;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 
@@ -75,7 +77,21 @@ public class CitiesDiffCallback extends DiffUtil.Callback {
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
         final WeatherAdapterModel oldItem = oldList.get(oldItemPosition);
         final WeatherAdapterModel newItem = newList.get(newItemPosition);
-        return oldItem.toString().equals(newItem.toString());
+        return oldItem.getCity().getId() == newItem.getCity().getId() && oldItem.getWeather() == newItem.getWeather();
     }
 
+    @Nullable
+    @Override
+    public Object getChangePayload(int oldItemPosition, int newItemPosition) {
+        final WeatherAdapterModel oldItem = oldList.get(oldItemPosition);
+        final WeatherAdapterModel newItem = newList.get(newItemPosition);
+        Bundle diff = new Bundle();
+
+        if (!newItem.toString().equals(oldItem.toString())) {
+            diff.putString("value", newItem.toString());
+        } else {
+            return null;
+        }
+        return diff;
+    }
 }

@@ -1,4 +1,4 @@
-package com.zhexenov.weather.modules;
+package com.zhexenov.weather.di.modules;
 
 import android.app.Application;
 import android.content.Context;
