@@ -15,25 +15,23 @@ public class Weather {
 
     @PrimaryKey
     @ColumnInfo(name = "city_id")
-    @SerializedName("id")
     private final int cityId;
 
     @ColumnInfo(name = "dt")
-    @SerializedName("dt")
     private final int dateTime;
 
     @ColumnInfo(name = "temp")
-    @SerializedName("main")
-    private final Main main;
+    private final float temp;
 
     /**
      * @param cityId unique city id
      * @param dateTime timestamp
+     * @param temp temperature in Celsius
      */
-    public Weather(int cityId, int dateTime, Main main) {
+    public Weather(int cityId, int dateTime, float temp) {
         this.cityId = cityId;
         this.dateTime = dateTime;
-        this.main = main;
+        this.temp = temp;
     }
 
 
@@ -45,8 +43,8 @@ public class Weather {
         return dateTime;
     }
 
-    public Main getMain() {
-        return main;
+    public float getTemp() {
+        return temp;
     }
 
     @Override
@@ -62,19 +60,4 @@ public class Weather {
         return Objects.hash(cityId, dateTime);
     }
 
-
-
-    public static class Main {
-
-        @SerializedName("temp")
-        private float temp;
-
-        public float getTemp() {
-            return temp;
-        }
-
-        public void setTemp(int temp) {
-            this.temp = temp;
-        }
-    }
 }

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.zhexenov.weather.api.WeatherApi;
 import com.zhexenov.weather.data.Weather;
+import com.zhexenov.weather.data.WeatherDto;
 import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 
 import javax.inject.Inject;
@@ -30,12 +31,18 @@ public class WeatherRemoteDataSource implements WeatherDataSource {
         api.fetchWeather(cityId, "16f357cca642e295922954dfe882053f", "metric")
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Weather>() {
+                .subscribe(new Consumer<WeatherDto>() {
                     @Override
-                    public void accept(Weather forecast) {
-                        callback.onWeatherLoaded(forecast);
+                    public void accept(WeatherDto forecast) {
+                        Weather weather = new Weather(forecast.getCityId(), forecast.getDateTime(), forecast.getMain().getTemp());
+                        callback.onWeatherLoaded(weather);
                     }
                 });
+    }
+
+    @Override
+    public Weather loadWeatherForCity(int cityId) {
+        return null;
     }
 
     @Override

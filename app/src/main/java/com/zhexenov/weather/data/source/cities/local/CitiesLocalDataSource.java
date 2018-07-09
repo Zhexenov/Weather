@@ -13,6 +13,7 @@ import javax.inject.Singleton;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -43,8 +44,7 @@ public class CitiesLocalDataSource implements CitiesDataSource {
     @SuppressLint("CheckResult")
     @Override
     public void getCities(String searchText, @NonNull final LoadCitiesCallback callback) {
-        citiesDao.loadCities(searchText).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(cities -> {
+        citiesDao.loadCities(searchText).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(cities -> {
                     if (cities.isEmpty()) {
                         callback.onDataNotAvailable();
                     } else {

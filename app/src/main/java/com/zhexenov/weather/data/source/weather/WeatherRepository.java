@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import io.reactivex.Flowable;
 import timber.log.Timber;
 
 public class WeatherRepository implements WeatherDataSource {
@@ -28,6 +29,11 @@ public class WeatherRepository implements WeatherDataSource {
         this.remoteDataSource = remoteDataSource;
     }
 
+
+    @Override
+    public Weather loadWeatherForCity(int cityId) {
+        return null;
+    }
 
     @Override
     public void getWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {
@@ -69,11 +75,10 @@ public class WeatherRepository implements WeatherDataSource {
     }
 
     private void loadRemoteWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {
-        Timber.e("load weather");
         remoteDataSource.getWeatherForCity(cityId, new GetWeatherCallback() {
             @Override
             public void onWeatherLoaded(Weather forecast) {
-                    Timber.e("Loaded forecast: %s - %s", forecast.getCityId(), forecast.getMain().getTemp());
+                Timber.e("Loaded forecast: %s - %s", forecast.getCityId(), forecast.getTemp());
                 cacheWeather(forecast);
                 saveWeather(forecast);
                 callback.onWeatherLoaded(forecast);

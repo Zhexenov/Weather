@@ -45,6 +45,11 @@ public class WeatherLocalDataSource implements WeatherDataSource {
                 });
     }
 
+    @Override
+    public Weather loadWeatherForCity(int cityId) {
+        return null;
+    }
+
     @SuppressLint("CheckResult")
     @Override
     public void saveWeather(@NonNull Weather forecast) {

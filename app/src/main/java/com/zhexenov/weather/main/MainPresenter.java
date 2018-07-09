@@ -1,10 +1,13 @@
 package com.zhexenov.weather.main;
 
+import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Looper;
+
 import com.zhexenov.weather.data.City;
 import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.data.source.cities.CitiesDataSource;
 import com.zhexenov.weather.data.source.cities.CitiesRepository;
-import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 import com.zhexenov.weather.data.source.weather.WeatherRepository;
 import com.zhexenov.weather.di.ActivityScoped;
 
@@ -13,6 +16,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import timber.log.Timber;
 
 @ActivityScoped
@@ -20,6 +28,9 @@ final class MainPresenter implements MainContract.Presenter {
 
     private final CitiesRepository citiesRepository;
     private final WeatherRepository weatherRepository;
+
+    Handler handler = new Handler(Looper.getMainLooper());
+    Runnable runnable;
 
     @Nullable
     private MainContract.View view;
@@ -38,20 +49,7 @@ final class MainPresenter implements MainContract.Presenter {
             public void onCitiesLoaded(List<City> cities) {
                 if (view != null) {
                     view.showCities(cities);
-
-                    for (City city: cities) {
-                        weatherRepository.getWeatherForCity(city.getId(), new WeatherDataSource.GetWeatherCallback() {
-                            @Override
-                            public void onWeatherLoaded(Weather forecast) {
-                                Timber.e("Forecast: %s - %s", forecast.getCityId(), forecast.getMain().getTemp());
-                            }
-
-                            @Override
-                            public void onDataNotAvailable() {
-                                Timber.e("Weather not available");
-                            }
-                        });
-                    }
+                    loadWeathersForCities(cities);
                 }
             }
 
@@ -60,6 +58,37 @@ final class MainPresenter implements MainContract.Presenter {
                 Timber.e("Data not available");
             }
         });
+    }
+
+    @SuppressLint("CheckResult")
+    private void loadWeathersForCities(List<City> list) {
+//        Observable.fromIterable(list).
+//                flatMap((Function<City, ObservableSource<Weather>>) city -> Observable.just(weatherRepository.loadWeatherForCity(city.getId())))
+//        .subscribe(new Consumer<Weather>() {
+//            @Override
+//            public void accept(Weather weather) throws Exception {
+//
+//            }
+//        });
+
+
+         Disposable disposable = Observable.fromIterable(list).
+                flatMap((Function<City, ObservableSource<Weather>>) city -> Observable.just(new Weather(1, (int) System.currentTimeMillis(), 1.f)))
+        .subscribe(new Consumer<Weather>() {
+            @Override
+            public void accept(Weather weather) throws Exception {
+                Timber.e("Weather %s ", weather.getDateTime());
+            }
+        });
+
+        handler.removeCallbacks(runnable);
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        };
+        handler.post(runnable);
     }
 
     /**
