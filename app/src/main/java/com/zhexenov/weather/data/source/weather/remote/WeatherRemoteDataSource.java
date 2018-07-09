@@ -28,6 +28,8 @@ public class WeatherRemoteDataSource implements WeatherDataSource {
     @SuppressLint("CheckResult")
     @Override
     public void getWeatherForCity(int cityId, @NonNull final GetWeatherCallback callback) {
+        Timber.e("Remote city id: %s", cityId);
+
         api.fetchWeather(cityId, "16f357cca642e295922954dfe882053f", "metric")
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())

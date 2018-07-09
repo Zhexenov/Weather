@@ -1,18 +1,20 @@
-package com.zhexenov.weather.main;
+package com.zhexenov.weather.main.adapter;
 
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 
 import com.zhexenov.weather.data.City;
+import com.zhexenov.weather.data.Weather;
 
 import java.util.List;
+import java.util.Map;
 
 public class CitiesDiffCallback extends DiffUtil.Callback {
 
-    private final List<City> oldList;
-    private final List<City> newList;
+    private final List<WeatherAdapterModel> oldList;
+    private final List<WeatherAdapterModel> newList;
 
-    CitiesDiffCallback(List<City> oldList, List<City> newList) {
+    CitiesDiffCallback(List<WeatherAdapterModel> oldList, List<WeatherAdapterModel> newList) {
         this.oldList = oldList;
         this.newList = newList;
     }
@@ -48,7 +50,7 @@ public class CitiesDiffCallback extends DiffUtil.Callback {
      */
     @Override
     public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-        return oldList.get(oldItemPosition).getId() == newList.get(newItemPosition).getId();
+        return oldList.get(oldItemPosition).getCity().getId() == newList.get(newItemPosition).getCity().getId();
     }
 
     /**
@@ -71,8 +73,9 @@ public class CitiesDiffCallback extends DiffUtil.Callback {
      */
     @Override
     public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-        final City oldCity = oldList.get(oldItemPosition);
-        final City newCity = newList.get(newItemPosition);
-        return oldCity.getName().equals(newCity.getName());
+        final WeatherAdapterModel oldItem = oldList.get(oldItemPosition);
+        final WeatherAdapterModel newItem = newList.get(newItemPosition);
+        return oldItem.toString().equals(newItem.toString());
     }
+
 }

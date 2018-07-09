@@ -18,8 +18,10 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import timber.log.Timber;
 
 @ActivityScoped
@@ -70,7 +72,9 @@ final class MainPresenter implements MainContract.Presenter {
 
 
     private void loadWeathersForCities(List<City> list, @Nonnull WeatherDataSource.GetWeatherForCityCallback callback) {
-        Objects.requireNonNull(disposable).dispose();
+        if (disposable != null) {
+            disposable.dispose();
+        }
         disposable = Observable.fromIterable(list).
                 flatMap((Function<City, ObservableSource<Weather>>) city -> {
                     weatherRepository.getWeatherForCity(city.getId(), new WeatherDataSource.GetWeatherCallback() {
@@ -84,8 +88,12 @@ final class MainPresenter implements MainContract.Presenter {
                             callback.onDataNotAvailable(city);
                         }
                     });
-                    return null;
-                }).subscribe();
+                    return Observable.just(new Weather(1, 1, 1f));
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe();
+
     }
 
     /**
