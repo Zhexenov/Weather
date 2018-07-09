@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 import timber.log.Timber;
 
 public class WeatherRepository implements WeatherDataSource {
@@ -30,10 +31,6 @@ public class WeatherRepository implements WeatherDataSource {
     }
 
 
-    @Override
-    public Weather loadWeatherForCity(int cityId) {
-        return null;
-    }
 
     @Override
     public void getWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {

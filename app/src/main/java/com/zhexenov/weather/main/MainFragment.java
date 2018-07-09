@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.zhexenov.weather.R;
 import com.zhexenov.weather.WeatherApplication;
 import com.zhexenov.weather.data.City;
+import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.util.RecyclerTouchListener;
 
 import java.util.ArrayList;
@@ -96,6 +97,16 @@ public class MainFragment extends DaggerFragment implements MainContract.View {
     @Override
     public void showCities(List<City> cities) {
         adapter.updateDataSet(cities);
+    }
+
+    @Override
+    public void showWeatherForCity(Weather weather, City city) {
+
+    }
+
+    @Override
+    public void showErrorForCity(City city) {
+
     }
 
     @OnTextChanged(R.id.city_name)

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
@@ -44,11 +45,7 @@ public class WeatherLocalDataSource implements WeatherDataSource {
                     }
                 });
     }
-
-    @Override
-    public Weather loadWeatherForCity(int cityId) {
-        return null;
-    }
+    
 
     @SuppressLint("CheckResult")
     @Override

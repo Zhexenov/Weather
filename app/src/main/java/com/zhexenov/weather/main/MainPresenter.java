@@ -1,25 +1,24 @@
 package com.zhexenov.weather.main;
 
-import android.annotation.SuppressLint;
-import android.os.Handler;
-import android.os.Looper;
-
 import com.zhexenov.weather.data.City;
 import com.zhexenov.weather.data.Weather;
 import com.zhexenov.weather.data.source.cities.CitiesDataSource;
 import com.zhexenov.weather.data.source.cities.CitiesRepository;
+import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 import com.zhexenov.weather.data.source.weather.WeatherRepository;
 import com.zhexenov.weather.di.ActivityScoped;
 
 import java.util.List;
+import java.util.Objects;
 
+import javax.annotation.Nonnegative;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import timber.log.Timber;
 
@@ -29,8 +28,7 @@ final class MainPresenter implements MainContract.Presenter {
     private final CitiesRepository citiesRepository;
     private final WeatherRepository weatherRepository;
 
-    Handler handler = new Handler(Looper.getMainLooper());
-    Runnable runnable;
+    private Disposable disposable;
 
     @Nullable
     private MainContract.View view;
@@ -49,7 +47,17 @@ final class MainPresenter implements MainContract.Presenter {
             public void onCitiesLoaded(List<City> cities) {
                 if (view != null) {
                     view.showCities(cities);
-                    loadWeathersForCities(cities);
+                    loadWeathersForCities(cities, new WeatherDataSource.GetWeatherForCityCallback() {
+                        @Override
+                        public void onWeatherLoaded(Weather forecast, City city) {
+                            view.showWeatherForCity(forecast, city);
+                        }
+
+                        @Override
+                        public void onDataNotAvailable(City city) {
+                            view.showErrorForCity(city);
+                        }
+                    });
                 }
             }
 
@@ -60,35 +68,24 @@ final class MainPresenter implements MainContract.Presenter {
         });
     }
 
-    @SuppressLint("CheckResult")
-    private void loadWeathersForCities(List<City> list) {
-//        Observable.fromIterable(list).
-//                flatMap((Function<City, ObservableSource<Weather>>) city -> Observable.just(weatherRepository.loadWeatherForCity(city.getId())))
-//        .subscribe(new Consumer<Weather>() {
-//            @Override
-//            public void accept(Weather weather) throws Exception {
-//
-//            }
-//        });
 
+    private void loadWeathersForCities(List<City> list, @Nonnull WeatherDataSource.GetWeatherForCityCallback callback) {
+        Objects.requireNonNull(disposable).dispose();
+        disposable = Observable.fromIterable(list).
+                flatMap((Function<City, ObservableSource<Weather>>) city -> {
+                    weatherRepository.getWeatherForCity(city.getId(), new WeatherDataSource.GetWeatherCallback() {
+                        @Override
+                        public void onWeatherLoaded(Weather forecast) {
+                            callback.onWeatherLoaded(forecast, city);
+                        }
 
-         Disposable disposable = Observable.fromIterable(list).
-                flatMap((Function<City, ObservableSource<Weather>>) city -> Observable.just(new Weather(1, (int) System.currentTimeMillis(), 1.f)))
-        .subscribe(new Consumer<Weather>() {
-            @Override
-            public void accept(Weather weather) throws Exception {
-                Timber.e("Weather %s ", weather.getDateTime());
-            }
-        });
-
-        handler.removeCallbacks(runnable);
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        };
-        handler.post(runnable);
+                        @Override
+                        public void onDataNotAvailable() {
+                            callback.onDataNotAvailable(city);
+                        }
+                    });
+                    return null;
+                }).subscribe();
     }
 
     /**
