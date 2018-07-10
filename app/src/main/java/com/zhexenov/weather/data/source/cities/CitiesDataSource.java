@@ -1,29 +1,16 @@
 package com.zhexenov.weather.data.source.cities;
 
-import android.support.annotation.NonNull;
-
 import com.zhexenov.weather.data.City;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
+import io.reactivex.Single;
+
 public interface CitiesDataSource {
 
-    interface LoadCitiesCallback {
+    Maybe<City> getCity(int cityId);
 
-        void onCitiesLoaded(List<City> cities);
-
-        void onDataNotAvailable();
-    }
-
-    interface GetCityCallback {
-
-        void onCityLoaded(City city);
-
-        void onDataNotAvailable();
-    }
-
-    void getCity(int cityId, @NonNull GetCityCallback callback);
-
-    void getCities(String searchText, @NonNull LoadCitiesCallback callback);
+    Single<List<City>> getCities(String searchText);
 
 }

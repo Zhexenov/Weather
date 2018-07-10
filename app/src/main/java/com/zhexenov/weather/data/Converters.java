@@ -6,12 +6,12 @@ import com.google.gson.Gson;
 
 public class Converters {
     @TypeConverter
-    public static WeatherDto.Main fromString(String value) {
-        return new Gson().fromJson(value, WeatherDto.Main.class);
+    public static Weather.Main fromString(String value) {
+        return new Gson().fromJson(value, Weather.Main.class);
     }
 
     @TypeConverter
-    public static String fromMain(WeatherDto.Main main) {
+    public static String fromMain(Weather.Main main) {
         return new Gson().toJson(main);
     }
 }

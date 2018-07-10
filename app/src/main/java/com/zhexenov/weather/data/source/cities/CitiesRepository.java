@@ -1,12 +1,17 @@
 package com.zhexenov.weather.data.source.cities;
 
 
-import android.support.annotation.NonNull;
-
+import com.zhexenov.weather.data.City;
 import com.zhexenov.weather.data.source.Local;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 @Singleton
 public class CitiesRepository implements CitiesDataSource {
@@ -18,13 +23,14 @@ public class CitiesRepository implements CitiesDataSource {
         this.citiesLocalDataSource = citiesLocalDataSource;
     }
 
+
     @Override
-    public void getCity(int cityId, @NonNull GetCityCallback callback) {
-        citiesLocalDataSource.getCity(cityId, callback);
+    public Maybe<City> getCity(int cityId) {
+        return citiesLocalDataSource.getCity(cityId);
     }
 
     @Override
-    public void getCities(String searchText, @NonNull LoadCitiesCallback callback) {
-        citiesLocalDataSource.getCities(searchText, callback);
+    public Single<List<City>> getCities(String searchText) {
+        return citiesLocalDataSource.getCities(searchText);
     }
 }

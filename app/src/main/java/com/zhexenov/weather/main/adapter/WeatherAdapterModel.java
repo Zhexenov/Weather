@@ -63,6 +63,6 @@ public class WeatherAdapterModel {
         if (weather.getCityId() == -1) {
             return String.format("%s: Error", city.getName());
         }
-        return String.format("%s: %s Celsius", city.getName(), (int) weather.getTemp());
+        return String.format("%s: %s Celsius", city.getName(), (int) weather.getMain().getTemp());
     }
 }

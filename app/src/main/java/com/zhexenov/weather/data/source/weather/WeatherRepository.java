@@ -13,8 +13,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
 import timber.log.Timber;
 
 public class WeatherRepository implements WeatherDataSource {
@@ -32,35 +34,34 @@ public class WeatherRepository implements WeatherDataSource {
     }
 
 
-
     @Override
-    public void getWeatherForCity(int cityId, boolean onlyValidCache, @NonNull GetWeatherCallback callback) {
+    public Single<Weather> getSingleWeather(int cityId, boolean onlyValidCache) {
         Weather weather = getWeatherForCity(cityId);
         if (weather != null) {
             if (isValidCache(weather)) {
-                callback.onWeatherLoaded(weather);
-                return;
+                return Single.just(weather);
             }
             cachedWeathers.remove(cityId);
         }
-        localDataSource.getWeatherForCity(cityId, onlyValidCache, new GetWeatherCallback() {
-            @Override
-            public void onWeatherLoaded(Weather forecast) {
-                if (!onlyValidCache) {
-                    callback.onWeatherLoaded(forecast);
-                } else if (isValidCache(forecast)) {
-                    cacheWeather(forecast);
-                    callback.onWeatherLoaded(forecast);
-                } else {
-                    loadRemoteWeatherForCity(cityId, callback);
-                }
-            }
+        return Single.create((SingleOnSubscribe<Boolean>) e -> e.onSuccess(localDataSource.validWeatherExists(cityId, onlyValidCache)))
+                .flatMap((Function<Boolean, SingleSource<Weather>>) aBoolean -> {
+                    if (aBoolean) {
+                        return localDataSource.getSingleWeather(cityId, onlyValidCache).map(weather1 -> {
+                            cacheWeather(weather1);
+                            return weather1;
+                        });
+                    }
+                    return remoteDataSource.getSingleWeather(cityId, false).map(weather11 -> {
+                        cacheWeather(weather11);
+                        saveWeather(weather11);
+                        return weather11;
+                    });
+                });
+    }
 
-            @Override
-            public void onDataNotAvailable() {
-                loadRemoteWeatherForCity(cityId, callback);
-            }
-        });
+    @Override
+    public boolean validWeatherExists(int cityId, boolean validateCache) {
+        return false;
     }
 
     @Override
@@ -71,22 +72,6 @@ public class WeatherRepository implements WeatherDataSource {
     @Override
     public void deleteWeather(@NonNull Weather forecast) {
         localDataSource.deleteWeather(forecast);
-    }
-
-    private void loadRemoteWeatherForCity(int cityId, @NonNull GetWeatherCallback callback) {
-        remoteDataSource.getWeatherForCity(cityId, false, new GetWeatherCallback() {
-            @Override
-            public void onWeatherLoaded(Weather forecast) {
-                cacheWeather(forecast);
-                saveWeather(forecast);
-                callback.onWeatherLoaded(forecast);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                callback.onDataNotAvailable();
-            }
-        });
     }
 
     private void cacheWeather(@NonNull Weather forecast) {

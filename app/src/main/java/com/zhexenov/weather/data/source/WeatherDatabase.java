@@ -12,7 +12,7 @@ import com.zhexenov.weather.data.source.cities.local.CitiesDao;
 import com.zhexenov.weather.data.source.weather.local.WeathersDao;
 
 @Database(entities = { Weather.class }, version = 1)
-//@TypeConverters({ Converters.class })
+@TypeConverters({ Converters.class })
 public abstract class WeatherDatabase extends RoomDatabase {
 
     public abstract WeathersDao weathersDao();

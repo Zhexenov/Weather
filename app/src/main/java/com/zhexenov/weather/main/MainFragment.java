@@ -150,8 +150,8 @@ public class MainFragment extends DaggerFragment implements MainContract.View {
 
     @Override
     public void showErrorForCity(City city) {
-        // new Weather(-1, -1, -1.f) for error weather
-        WeatherAdapterModel model = new WeatherAdapterModel(city, new Weather(-1, -1, -1.f));
+        // new Weather() for error
+        WeatherAdapterModel model = new WeatherAdapterModel(city, new Weather());
         int index = dataSet.indexOf(model);
 
         if (index != -1) {

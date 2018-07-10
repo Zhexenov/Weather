@@ -1,25 +1,24 @@
 package com.zhexenov.weather.main;
 
 import com.zhexenov.weather.data.City;
-import com.zhexenov.weather.data.Weather;
-import com.zhexenov.weather.data.source.cities.CitiesDataSource;
 import com.zhexenov.weather.data.source.cities.CitiesRepository;
-import com.zhexenov.weather.data.source.weather.WeatherDataSource;
 import com.zhexenov.weather.data.source.weather.WeatherRepository;
 import com.zhexenov.weather.data.source.weather.local.MySharedPreferences;
 import com.zhexenov.weather.di.ActivityScoped;
+import com.zhexenov.weather.util.WeatherUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Function;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import timber.log.Timber;
 
 @ActivityScoped
 final class MainPresenter implements MainContract.Presenter {
@@ -44,60 +43,47 @@ final class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void loadCities(String searchText, boolean onlyValidCache) {
-        citiesRepository.getCities(searchText, new CitiesDataSource.LoadCitiesCallback() {
-            @Override
-            public void onCitiesLoaded(List<City> cities) {
-                if (view != null) {
-                    view.showCities(cities);
-                    loadWeathersForCities(cities, onlyValidCache, new WeatherDataSource.GetWeatherForCityCallback() {
-                        @Override
-                        public void onWeatherLoaded(Weather forecast, City city) {
-                            view.showWeatherForCity(forecast, city);
-                        }
-
-                        @Override
-                        public void onDataNotAvailable(City city) {
-                            view.showErrorForCity(city);
-                        }
-                    });
-                }
-                sharedPreferences.putData(MySharedPreferences.LAST_REQUEST, searchText);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                if (view != null) {
-                    view.showCities(new ArrayList<>());
-                    view.showSearchError();
-                }
-            }
-        });
-    }
-
-
-    private void loadWeathersForCities(List<City> list, boolean onlyValidCache, @Nonnull WeatherDataSource.GetWeatherForCityCallback callback) {
+        String transl = WeatherUtils.transliterate(searchText);
+        sharedPreferences.putData(MySharedPreferences.LAST_REQUEST, transl);
         disposable.clear();
-        disposable.add(Observable.fromIterable(list).
-                flatMap((Function<City, ObservableSource<Weather>>) city -> {
-                    weatherRepository.getWeatherForCity(city.getId(), onlyValidCache, new WeatherDataSource.GetWeatherCallback() {
-                        @Override
-                        public void onWeatherLoaded(Weather forecast) {
-                            callback.onWeatherLoaded(forecast, city);
-                        }
-
-                        @Override
-                        public void onDataNotAvailable() {
-                            callback.onDataNotAvailable(city);
-                        }
-                    });
-                    return Observable.just(new Weather(1, 1, 1f));
-                })
-                .doOnComplete(() -> {
-                    if (!onlyValidCache) {
-                        loadWeathersForCities(list, true, callback);
+        citiesRepository.getCities(transl)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<List<City>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
                     }
-                })
-                .subscribe());
+
+                    @Override
+                    public void onSuccess(List<City> cities) {
+                        if (view != null) {
+                            view.showCities(cities);
+
+                            if (cities.isEmpty()) {
+                                view.showSearchError();
+                            }
+
+                            for (City city : cities) {
+                                disposable.add(weatherRepository.getSingleWeather(city.getId(), onlyValidCache)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe(weather -> view.showWeatherForCity(weather, city),
+                                                throwable -> view.showErrorForCity(city)));
+                            }
+                            if (!onlyValidCache) {
+                                loadCities(searchText, true);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        if (view != null) {
+                            view.showCities(new ArrayList<>());
+                            view.showSearchError();
+                        }
+                    }
+                });
     }
 
     /**

@@ -11,6 +11,7 @@ import com.zhexenov.weather.data.Weather;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 @Dao
@@ -18,6 +19,9 @@ public interface WeathersDao {
 
     @Query("SELECT * FROM Weather WHERE city_id = :cityId")
     Single<Weather> getWeatherForCityId(int cityId);
+
+    @Query("SELECT * FROM Weather WHERE city_id = :cityId")
+    Weather weatherForCityId(int cityId);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertWeather(Weather weather);

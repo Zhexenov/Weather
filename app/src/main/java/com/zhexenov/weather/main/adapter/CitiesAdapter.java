@@ -93,7 +93,7 @@ public class CitiesAdapter extends RecyclerView.Adapter<CitiesAdapter.ViewHolder
                         res.getString(R.string.weather));
             } else {
                 text = String.format("%s:  %s\n%s:  %s °C", res.getString(R.string.region), item.getCity().getName(),
-                        res.getString(R.string.weather), (int) item.getWeather().getTemp());
+                        res.getString(R.string.weather), (int) item.getWeather().getMain().getTemp());
             }
             cityName.setText(text);
         }
