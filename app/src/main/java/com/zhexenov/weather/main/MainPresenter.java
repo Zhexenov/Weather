@@ -57,11 +57,11 @@ final class MainPresenter implements MainContract.Presenter {
                     @Override
                     public void onSuccess(List<City> cities) {
                         if (view != null) {
-                            view.showCities(cities);
-
                             if (cities.isEmpty()) {
                                 view.showSearchError();
+                                return;
                             }
+                            view.showCities(cities);
 
                             for (City city : cities) {
                                 disposable.add(weatherRepository.getSingleWeather(city.getId(), onlyValidCache)
